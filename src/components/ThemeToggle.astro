@@ -1,0 +1,46 @@
+<button
+  type="button"
+  class="focus-ring inline-flex h-12 min-w-12 items-center justify-center border border-line bg-surface px-3 font-mono text-xs font-semibold uppercase tracking-[0.16em] text-ink shadow-hard hover:bg-accent hover:text-surface"
+  data-theme-toggle
+  aria-label="Toggle color theme"
+>
+  <span data-theme-toggle-label>Mode</span>
+</button>
+
+<script is:inline>
+  (() => {
+    const storageKey = 'psblog-theme';
+    const buttons = document.querySelectorAll('[data-theme-toggle]');
+
+    const getPreferredTheme = () => {
+      const storedTheme = localStorage.getItem(storageKey);
+      if (storedTheme === 'light' || storedTheme === 'dark') {
+        return storedTheme;
+      }
+
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    };
+
+    const setTheme = (theme) => {
+      document.documentElement.classList.toggle('dark', theme === 'dark');
+      localStorage.setItem(storageKey, theme);
+
+      buttons.forEach((button) => {
+        const label = button.querySelector('[data-theme-toggle-label]');
+        button.setAttribute('aria-pressed', String(theme === 'dark'));
+        if (label) {
+          label.textContent = theme === 'dark' ? 'Dark' : 'Light';
+        }
+      });
+    };
+
+    buttons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const nextTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+        setTheme(nextTheme);
+      });
+    });
+
+    setTheme(getPreferredTheme());
+  })();
+</script>

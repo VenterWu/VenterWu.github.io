@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --color-canvas: 246 242 232;
+  --color-surface: 255 252 244;
+  --color-muted: 232 227 215;
+  --color-ink: 20 21 22;
+  --color-soft: 88 88 83;
+  --color-accent: 215 42 32;
+  --color-highlight: 255 194 58;
+  --color-line: 35 36 35;
+  --color-shadow: 20 21 22;
+  --grid-line: rgb(20 21 22 / 0.08);
+  --grid-cross: rgb(215 42 32 / 0.16);
+}
+
+html.dark {
+  color-scheme: dark;
+  --color-canvas: 15 17 19;
+  --color-surface: 24 27 30;
+  --color-muted: 36 39 42;
+  --color-ink: 243 238 225;
+  --color-soft: 174 170 160;
+  --color-accent: 255 76 60;
+  --color-highlight: 134 204 255;
+  --color-line: 214 208 193;
+  --color-shadow: 0 0 0;
+  --grid-line: rgb(243 238 225 / 0.08);
+  --grid-cross: rgb(255 76 60 / 0.18);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    background: rgb(var(--color-canvas));
+  }
+
+  body {
+    @apply min-h-screen bg-canvas font-sans text-ink antialiased;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+      radial-gradient(circle at 24px 24px, var(--grid-cross) 2px, transparent 2px);
+    background-position: 0 0, 0 0, 0 0;
+    background-size: 48px 48px, 48px 48px, 96px 96px;
+  }
+
+  a {
+    @apply text-accent underline-offset-4 transition-colors hover:text-ink;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    letter-spacing: 0;
+  }
+
+  ::selection {
+    @apply bg-accent text-surface;
+  }
+}
+
+@layer components {
+  .content-prose {
+    @apply prose max-w-none dark:prose-invert prose-headings:scroll-mt-28 prose-headings:font-sans prose-headings:font-semibold prose-headings:text-ink prose-p:text-soft prose-a:text-accent prose-a:no-underline hover:prose-a:text-ink prose-strong:text-ink prose-code:rounded-none prose-code:border prose-code:border-line prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:font-mono prose-code:text-ink prose-pre:rounded-none prose-pre:border prose-pre:border-line prose-pre:bg-ink prose-pre:text-surface prose-blockquote:border-accent prose-blockquote:text-soft;
+  }
+
+  .focus-ring {
+    @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+  }
+
+  .site-shell {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .label-code {
+    @apply font-mono text-xs font-semibold uppercase tracking-[0.22em] text-accent;
+  }
+
+  .construct-panel {
+    @apply border border-line bg-surface shadow-hard;
+  }
+
+  .construct-link {
+    @apply focus-ring inline-flex items-center justify-center border border-line bg-surface px-4 py-2 font-mono text-xs font-semibold uppercase tracking-[0.16em] text-ink no-underline shadow-hard transition hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-accent hover:text-surface;
+  }
+}

@@ -1,0 +1,36 @@
+---
+import type { PublishedPage } from '../utils/content';
+import BaseLayout from './BaseLayout.astro';
+import { routes } from '../utils/config';
+import { formatDate, toIsoDate } from '../utils/date';
+
+interface Props {
+  page: PublishedPage;
+}
+
+const { page } = Astro.props;
+---
+
+<BaseLayout
+  title={page.data.title}
+  description={page.data.description}
+  canonicalPath={routes.page(page.slug)}
+  image={routes.og(`page-${page.slug}`)}
+>
+  <article class="site-shell max-w-4xl py-12">
+    <header class="border-b border-line pb-8">
+      <h1 class="text-5xl font-semibold leading-tight text-ink sm:text-6xl">{page.data.title}</h1>
+      <p class="mt-4 text-lg leading-8 text-soft">{page.data.description}</p>
+      {
+        page.data.updatedDate && (
+          <p class="mt-3 text-sm text-soft">
+            Updated <time datetime={toIsoDate(page.data.updatedDate)}>{formatDate(page.data.updatedDate)}</time>
+          </p>
+        )
+      }
+    </header>
+    <div class="content-prose mt-8">
+      <slot />
+    </div>
+  </article>
+</BaseLayout>

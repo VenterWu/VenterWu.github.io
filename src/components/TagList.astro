@@ -1,0 +1,31 @@
+---
+import { routes, withBase } from '../utils/config';
+import { slugifyTag } from '../utils/content';
+
+interface Props {
+  tags: string[];
+  linked?: boolean;
+}
+
+const { tags, linked = true } = Astro.props;
+---
+
+<ul class="flex flex-wrap gap-2" aria-label="Tags">
+  {
+    tags.map((tag) => {
+      const tagContent = <span class="border border-line bg-muted px-2.5 py-1 font-mono text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-ink">{tag}</span>;
+
+      return (
+        <li>
+          {linked ? (
+            <a class="focus-ring inline-flex no-underline" href={withBase(routes.tag(slugifyTag(tag)))}>
+              {tagContent}
+            </a>
+          ) : (
+            tagContent
+          )}
+        </li>
+      );
+    })
+  }
+</ul>

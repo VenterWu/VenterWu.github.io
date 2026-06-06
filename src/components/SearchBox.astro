@@ -1,0 +1,101 @@
+---
+import { routes, withBase } from '../utils/config';
+
+const searchUrl = withBase(routes.search);
+---
+
+<section class="construct-panel p-4" data-search-box data-search-url={searchUrl}>
+  <label class="label-code block" for="site-search">Search index</label>
+  <div class="mt-3 flex flex-col gap-3 sm:flex-row">
+    <input
+      id="site-search"
+      class="focus-ring min-h-12 flex-1 border border-line bg-canvas px-3 py-2 font-mono text-sm text-ink placeholder:text-soft"
+      type="search"
+      placeholder="Query notes and pages"
+      autocomplete="off"
+      data-search-input
+    />
+  </div>
+  <p class="mt-2 font-mono text-xs uppercase tracking-[0.14em] text-soft" data-search-status>Type at least two characters.</p>
+  <ul class="mt-4 grid gap-3" data-search-results aria-live="polite"></ul>
+</section>
+
+<script is:inline>
+  (() => {
+    const escapeHtml = (value) =>
+      value.replace(/[&<>"']/g, (character) =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[character]
+      );
+
+    const normalize = (value) => value.toLowerCase().trim();
+
+    document.querySelectorAll('[data-search-box]').forEach((root) => {
+      const input = root.querySelector('[data-search-input]');
+      const status = root.querySelector('[data-search-status]');
+      const results = root.querySelector('[data-search-results]');
+      const searchUrl = root.getAttribute('data-search-url');
+      let documents = [];
+
+      const render = (items, query) => {
+        if (!results || !status) {
+          return;
+        }
+
+        results.innerHTML = '';
+
+        if (query.length < 2) {
+          status.textContent = 'Type at least two characters.';
+          return;
+        }
+
+        if (items.length === 0) {
+          status.textContent = 'No matches yet.';
+          return;
+        }
+
+        status.textContent = `${items.length} result${items.length === 1 ? '' : 's'}.`;
+        results.innerHTML = items
+          .map(
+            (item) => `
+              <li class="border border-line bg-canvas p-3">
+                <a class="focus-ring text-sm font-semibold text-ink no-underline hover:text-accent" href="${escapeHtml(item.href)}">${escapeHtml(item.title)}</a>
+                <p class="mt-1 font-mono text-xs uppercase tracking-[0.16em] text-soft">${escapeHtml(item.type)}</p>
+                <p class="mt-2 text-sm leading-6 text-soft">${escapeHtml(item.description)}</p>
+              </li>
+            `
+          )
+          .join('');
+      };
+
+      const search = () => {
+        const query = normalize(input?.value ?? '');
+        const terms = query.split(/\s+/).filter(Boolean);
+        const matches = documents
+          .map((item) => {
+            const haystack = normalize(`${item.title} ${item.description} ${item.tags.join(' ')} ${item.content}`);
+            const score = terms.reduce((total, term) => total + (haystack.includes(term) ? 1 : 0), 0);
+            return { item, score };
+          })
+          .filter((entry) => entry.score > 0)
+          .sort((leftEntry, rightEntry) => rightEntry.score - leftEntry.score)
+          .slice(0, 8)
+          .map((entry) => entry.item);
+
+        render(matches, query);
+      };
+
+      fetch(searchUrl)
+        .then((response) => response.json())
+        .then((payload) => {
+          documents = payload.documents ?? [];
+        })
+        .catch(() => {
+          if (status) {
+            status.textContent = 'Search index is unavailable.';
+          }
+        });
+
+      input?.addEventListener('input', search);
+    });
+  })();
+</script>
