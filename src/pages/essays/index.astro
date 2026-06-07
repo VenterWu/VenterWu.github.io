@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { getPublishedBlogPosts } from '../../utils/content';
+import { routes } from '../../utils/config';
+
+const posts = await getPublishedBlogPosts();
+const essayPosts = posts.filter((post) => post.data.tags.some((tag) => ['essay', 'essays', 'writing'].includes(tag.toLowerCase())));
+const visiblePosts = essayPosts.length > 0 ? essayPosts : posts;
+---
+
+<BaseLayout title="Essays" description="Longer writing and shaped reflections from Venter Field Notes." canonicalPath={routes.essays}>
+  <section class="site-shell py-12">
+    <p class="label-code" data-i18n="essays">Essays</p>
+    <h1 class="mt-2 font-serif text-5xl font-medium text-ink">Essays</h1>
+    <p class="mt-4 max-w-2xl text-soft">Longer reflections and more shaped writing. For now, this shelf draws from writing-tagged posts and falls back to the full notes archive.</p>
+    <div class="mt-8 grid gap-5 md:grid-cols-2">
+      {visiblePosts.map((post) => <PostCard post={post} />)}
+    </div>
+  </section>
+</BaseLayout>

@@ -1,6 +1,6 @@
 <button
   type="button"
-  class="focus-ring inline-flex h-12 min-w-12 items-center justify-center border border-line bg-surface px-3 font-mono text-xs font-semibold uppercase tracking-[0.16em] text-ink shadow-hard hover:bg-accent hover:text-surface"
+  class="focus-ring inline-flex h-10 min-w-10 items-center justify-center rounded-md border border-line/70 bg-surface/80 px-3 font-mono text-xs font-semibold uppercase tracking-[0.14em] text-ink transition hover:border-accent hover:bg-muted/70"
   data-theme-toggle
   aria-label="Toggle color theme"
 >
@@ -10,7 +10,14 @@
 <script is:inline>
   (() => {
     const storageKey = 'psblog-theme';
+    const localeKey = 'psblog-locale';
     const buttons = document.querySelectorAll('[data-theme-toggle]');
+    const labels = {
+      en: { light: 'Light', dark: 'Dark' },
+      zh: { light: '浅色', dark: '深色' },
+    };
+
+    const getLocale = () => (localStorage.getItem(localeKey) === 'zh' ? 'zh' : 'en');
 
     const getPreferredTheme = () => {
       const storedTheme = localStorage.getItem(storageKey);
@@ -29,7 +36,8 @@
         const label = button.querySelector('[data-theme-toggle-label]');
         button.setAttribute('aria-pressed', String(theme === 'dark'));
         if (label) {
-          label.textContent = theme === 'dark' ? 'Dark' : 'Light';
+          const locale = getLocale();
+          label.textContent = theme === 'dark' ? labels[locale].dark : labels[locale].light;
         }
       });
     };
@@ -42,5 +50,6 @@
     });
 
     setTheme(getPreferredTheme());
+    document.addEventListener('psblog:localechange', () => setTheme(getPreferredTheme()));
   })();
 </script>

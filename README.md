@@ -1,8 +1,8 @@
 # Venter Field Notes
 
-An Astro + TypeScript + Tailwind CSS personal blog MVP with a minimal, futuristic, constructivist visual system. It uses Markdown content collections, static output, SEO metadata, RSS, sitemap generation, dynamic SVG Open Graph images, client-side search, and a light/dark theme toggle.
+An Astro + TypeScript + Tailwind CSS personal site shaped as a portfolio, notebook, and archive. It uses Markdown content collections, static output, SEO metadata, RSS, sitemap generation, dynamic SVG Open Graph images, client-side search, and lightweight theme/language toggles.
 
-The current design pairs Space Grotesk with JetBrains Mono and uses warm white, charcoal, signal red, industrial gray, and restrained highlight colors through CSS variables in [src/styles/global.css](src/styles/global.css).
+The current design direction is **Warm Archive Garden**: soft paper backgrounds, low-saturation gray, deep brown-gray, dark gold accents, light archive labels, and a medium-low density homepage. [src/layouts/BaseLayout.astro](src/layouts/BaseLayout.astro) loads Newsreader, Inter, and JetBrains Mono; [src/styles/global.css](src/styles/global.css) exposes the color tokens to Tailwind.
 
 ## Local Setup
 
@@ -37,8 +37,15 @@ npm run preview
 
 - Blog posts live in [src/content/blog](src/content/blog) and render under `/blog/[slug]/`.
 - Pages live in [src/content/pages](src/content/pages) and render under `/pages/[slug]/`.
+- Public shelves are available at `/notes/`, `/essays/`, `/projects/`, `/atlas/`, and `/archive/`.
+- `/notes/` and `/blog/` currently read from the same blog collection; `/essays/` filters writing/essay tags and falls back to all posts until a dedicated essay model is added.
+- `/projects/` and `/atlas/` are planned portfolio/observation shelves with placeholder pages, not new content collections yet.
 - Frontmatter schemas are defined in [src/content/config.ts](src/content/config.ts).
 - Content helpers and exported types live in [src/utils/content.ts](src/utils/content.ts).
+
+## Interface Language
+
+The language toggle only changes interface labels such as navigation, index entries, buttons, and search status text. It does not translate authored content or create localized routes. The browser preference is stored in `localStorage` under `psblog-locale`, defaulting to English.
 
 ## GitHub Pages
 

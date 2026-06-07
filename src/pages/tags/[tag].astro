@@ -23,7 +23,7 @@ const { tag, posts } = Astro.props;
 <BaseLayout title={`Tag: ${tag.label}`} description={`Posts tagged with ${tag.label}.`} canonicalPath={routes.tag(tag.slug)}>
   <section class="site-shell py-12">
     <p class="label-code">Tag</p>
-    <h1 class="mt-2 text-5xl font-semibold text-ink">{tag.label}</h1>
+    <h1 class="mt-2 font-serif text-5xl font-medium text-ink">{tag.label}</h1>
     <p class="mt-4 font-mono text-sm uppercase tracking-[0.16em] text-soft">{posts.length} post{posts.length === 1 ? '' : 's'} in this topic.</p>
     <div class="mt-8 grid gap-5 md:grid-cols-2">
       {posts.map((post) => <PostCard post={post} />)}

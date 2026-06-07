@@ -86,11 +86,28 @@ For a project repository, set `base` to `/<repo-name>` in `src/utils/config.ts`;
 3. The page appears at `/pages/my-page/`.
 4. Add a navigation item in `src/utils/config.ts` if it should be globally visible.
 
+## Add Or Update A Shelf Route
+
+The current top-level shelves are `/notes/`, `/essays/`, `/projects/`, `/atlas/`, and `/archive/`.
+
+- Keep route constants in `src/utils/config.ts` and use `withBase()` for links.
+- `/notes/` and `/blog/` currently read from `src/content/blog`.
+- `/essays/` filters writing/essay tags and falls back to all posts.
+- `/projects/` and `/atlas/` are placeholder Astro pages until dedicated content collections are added.
+- `/archive/` is generated from published blog posts and tag stats.
+- Run `npm run build` after adding any route so Astro, RSS, sitemap, and search stay valid.
+
+## Interface Language Labels
+
+Use `data-i18n="key"` on navigation, index, and button labels that should switch between English and Chinese. Add the matching key to `src/components/LanguageToggle.astro`. Use `data-i18n-placeholder="key"` for input placeholders. Do not translate Markdown content through this toggle.
+
 ## Customize Styling
 
 - Global tokens and base styles live in `src/styles/global.css`.
 - Tailwind content scanning is configured in `tailwind.config.mjs`.
 - Keep theme colors defined through CSS variables so dark mode stays consistent.
+- Warm Archive Garden uses Newsreader for display/headings, Inter for UI/body, and JetBrains Mono for labels.
+- Keep the visual language soft: paper backgrounds, light borders, dark gold accents, small archive labels, and subtle hover motion.
 
 ## Troubleshooting
 

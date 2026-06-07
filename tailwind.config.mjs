@@ -17,12 +17,13 @@ export default {
         line: 'rgb(var(--color-line) / <alpha-value>)',
       },
       fontFamily: {
-        sans: ['Space Grotesk', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        serif: ['Newsreader', 'Literata', 'ui-serif', 'Georgia', 'serif'],
         mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Consolas', 'monospace'],
       },
       boxShadow: {
-        hard: '8px 8px 0 rgb(var(--color-shadow) / 1)',
-        soft: '0 24px 80px rgb(var(--color-shadow) / 0.16)',
+        hard: '0 10px 30px rgb(var(--color-shadow) / 0.08)',
+        soft: '0 18px 60px rgb(var(--color-shadow) / 0.10)',
       },
     },
   },

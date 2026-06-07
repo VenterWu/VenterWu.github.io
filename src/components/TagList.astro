@@ -13,7 +13,7 @@ const { tags, linked = true } = Astro.props;
 <ul class="flex flex-wrap gap-2" aria-label="Tags">
   {
     tags.map((tag) => {
-      const tagContent = <span class="border border-line bg-muted px-2.5 py-1 font-mono text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-ink">{tag}</span>;
+      const tagContent = <span class="rounded-full border border-line/70 bg-muted/60 px-2.5 py-1 font-mono text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-ink">{tag}</span>;
 
       return (
         <li>

@@ -4,19 +4,20 @@ import { routes, withBase } from '../utils/config';
 const searchUrl = withBase(routes.search);
 ---
 
-<section class="construct-panel p-4" data-search-box data-search-url={searchUrl}>
-  <label class="label-code block" for="site-search">Search index</label>
+<section class="archive-panel p-4" data-search-box data-search-url={searchUrl}>
+  <label class="label-code block" for="site-search" data-i18n="searchIndex">Search index</label>
   <div class="mt-3 flex flex-col gap-3 sm:flex-row">
     <input
       id="site-search"
-      class="focus-ring min-h-12 flex-1 border border-line bg-canvas px-3 py-2 font-mono text-sm text-ink placeholder:text-soft"
+      class="focus-ring min-h-12 flex-1 rounded-md border border-line/70 bg-canvas/70 px-3 py-2 font-mono text-sm text-ink placeholder:text-soft"
       type="search"
       placeholder="Query notes and pages"
+      data-i18n-placeholder="searchPlaceholder"
       autocomplete="off"
       data-search-input
     />
   </div>
-  <p class="mt-2 font-mono text-xs uppercase tracking-[0.14em] text-soft" data-search-status>Type at least two characters.</p>
+  <p class="mt-2 font-mono text-xs uppercase tracking-[0.14em] text-soft" data-search-status data-i18n="searchMin">Type at least two characters.</p>
   <ul class="mt-4 grid gap-3" data-search-results aria-live="polite"></ul>
 </section>
 
@@ -28,6 +29,7 @@ const searchUrl = withBase(routes.search);
       );
 
     const normalize = (value) => value.toLowerCase().trim();
+    const getText = (key, fallback) => window.psblogLocale?.text?.(key) ?? fallback;
 
     document.querySelectorAll('[data-search-box]').forEach((root) => {
       const input = root.querySelector('[data-search-input]');
@@ -44,12 +46,12 @@ const searchUrl = withBase(routes.search);
         results.innerHTML = '';
 
         if (query.length < 2) {
-          status.textContent = 'Type at least two characters.';
+          status.textContent = getText('searchMin', 'Type at least two characters.');
           return;
         }
 
         if (items.length === 0) {
-          status.textContent = 'No matches yet.';
+          status.textContent = getText('searchNoMatches', 'No matches yet.');
           return;
         }
 
@@ -57,7 +59,7 @@ const searchUrl = withBase(routes.search);
         results.innerHTML = items
           .map(
             (item) => `
-              <li class="border border-line bg-canvas p-3">
+              <li class="rounded-md border border-line/70 bg-canvas/55 p-3">
                 <a class="focus-ring text-sm font-semibold text-ink no-underline hover:text-accent" href="${escapeHtml(item.href)}">${escapeHtml(item.title)}</a>
                 <p class="mt-1 font-mono text-xs uppercase tracking-[0.16em] text-soft">${escapeHtml(item.type)}</p>
                 <p class="mt-2 text-sm leading-6 text-soft">${escapeHtml(item.description)}</p>
@@ -91,11 +93,12 @@ const searchUrl = withBase(routes.search);
         })
         .catch(() => {
           if (status) {
-            status.textContent = 'Search index is unavailable.';
+            status.textContent = getText('searchUnavailable', 'Search index is unavailable.');
           }
         });
 
       input?.addEventListener('input', search);
+      document.addEventListener('psblog:localechange', search);
     });
   })();
 </script>

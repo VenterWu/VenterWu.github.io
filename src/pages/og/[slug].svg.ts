@@ -58,22 +58,22 @@ function renderOgSvg(props: OgProps): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
     <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
-      <stop offset="0%" stop-color="#f8fafc" />
-      <stop offset="54%" stop-color="#ecfeff" />
-      <stop offset="100%" stop-color="#fffbeb" />
+      <stop offset="0%" stop-color="#fffdf8" />
+      <stop offset="56%" stop-color="#f8f5ee" />
+      <stop offset="100%" stop-color="#ede7dc" />
     </linearGradient>
   </defs>
   <rect width="1200" height="630" fill="url(#bg)" />
-  <rect x="72" y="72" width="1056" height="486" rx="28" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" />
-  <rect x="112" y="112" width="132" height="40" rx="12" fill="#0f766e" />
-  <text x="132" y="139" fill="#ffffff" font-family="Arial, sans-serif" font-size="20" font-weight="700">${label}</text>
-  <text x="112" y="258" fill="#0f172a" font-family="Arial, sans-serif" font-size="64" font-weight="800">
+  <rect x="72" y="72" width="1056" height="486" rx="18" fill="#fffdf8" stroke="#ccc3b5" stroke-width="2" />
+  <circle cx="1098" cy="108" r="10" fill="#977634" />
+  <text x="112" y="139" fill="#977634" font-family="Georgia, serif" font-size="22" font-weight="700">${label}</text>
+  <text x="112" y="258" fill="#332c25" font-family="Georgia, serif" font-size="64" font-weight="700">
     ${wrapSvgText(title, 28, 112, 0, 76)}
   </text>
-  <text x="112" y="458" fill="#475569" font-family="Arial, sans-serif" font-size="30" font-weight="500">
+  <text x="112" y="458" fill="#6f655a" font-family="Arial, sans-serif" font-size="30" font-weight="500">
     ${wrapSvgText(description, 54, 112, 0, 42)}
   </text>
-  <text x="112" y="522" fill="#0f766e" font-family="Arial, sans-serif" font-size="24" font-weight="700">${escapeXml(siteConfig.site.url.replace(/^https?:\/\//, ''))}</text>
+  <text x="112" y="522" fill="#977634" font-family="Arial, sans-serif" font-size="24" font-weight="700">${escapeXml(siteConfig.site.url.replace(/^https?:\/\//, ''))}</text>
 </svg>`;
 }
 

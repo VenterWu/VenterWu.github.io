@@ -6,12 +6,11 @@ The MVP is complete when a reader can browse posts, open an article, filter by t
 
 ## Current Sprint Scope
 
-- Initialize Astro, TypeScript, Tailwind, RSS, and sitemap.
-- Add typed blog and page content collections.
-- Implement core layouts and components.
-- Add sample content.
-- Add GitHub Pages workflow.
-- Verify dependency installation and production build.
+- Apply the Warm Archive Garden design direction across global styles, homepage, and shared components.
+- Add UI-only English/Chinese language switching for navigation, index labels, buttons, theme labels, and search status text.
+- Add non-dead top-level shelves for Notes, Essays, Projects, Atlas, and Archive.
+- Keep existing Astro content collections, SEO, RSS, sitemap, search, and GitHub Pages configuration intact.
+- Synchronize documentation and verify the production build.
 
 ## Backlog
 
@@ -29,8 +28,11 @@ The MVP is complete when a reader can browse posts, open an article, filter by t
 | BL-010 | Feature | Article navigation | Blog posts show reading time, TOC, tags, and previous/next links. | P1 |
 | BL-011 | Chore | GitHub Pages deployment | Workflow uses `withastro/action` and `actions/deploy-pages` with documented permissions and branch trigger. | P1 |
 | BL-012 | Documentation | Developer onboarding | README and docs explain install, local run, build, deployment, migration, and content schema. | P1 |
-| BL-013 | Enhancement | Projects collection | Add a typed `projects` collection and `/projects/` route after the blog MVP stabilizes. | P2 |
+| BL-013 | Enhancement | Projects collection | Replace the current `/projects/` placeholder with a typed collection, project status, stack, links, and case-study content. | P2 |
 | BL-014 | Enhancement | Content migration script | Use the `psblog` Python environment for scripts that normalize imported Markdown frontmatter. | P2 |
+| BL-015 | Enhancement | Atlas collection | Add typed Atlas entries for travel, photos, places, dates, observations, and optional image metadata. | P2 |
+| BL-016 | Enhancement | Motto history data | Move the homepage motto history from inline data into content/config if it grows beyond a few entries. | P3 |
+| BL-017 | Enhancement | Essays model | Decide whether Essays remains a tag-filtered shelf or becomes a dedicated collection/category. | P3 |
 
 ## Done Criteria
 
@@ -38,6 +40,7 @@ The MVP is complete when a reader can browse posts, open an article, filter by t
 - `npm install` succeeds when `pnpm` is unavailable.
 - `npm run build` succeeds.
 - No UI island framework is added.
+- UI language switching stays interface-only and does not translate authored content.
 - Placeholder GitHub Pages values are isolated and documented.
 - Astro dependency versions remain compatible with the local Node runtime, or the Node upgrade is documented before changing versions.
 

@@ -1,0 +1,123 @@
+<button
+  type="button"
+  class="focus-ring inline-flex h-10 min-w-10 items-center justify-center rounded-md border border-line/70 bg-surface/80 px-3 font-mono text-xs font-semibold uppercase tracking-[0.14em] text-ink transition hover:border-accent hover:bg-muted/70"
+  data-locale-toggle
+  aria-label="Toggle interface language"
+>
+  <span data-locale-toggle-label>EN</span>
+</button>
+
+<script is:inline>
+  (() => {
+    const storageKey = 'psblog-locale';
+    const dictionary = {
+      en: {
+        about: 'About',
+        archive: 'Archive',
+        atlas: 'Atlas',
+        essays: 'Essays',
+        featured: 'Featured',
+        index: 'Index',
+        latest: 'Latest',
+        notes: 'Notes',
+        projects: 'Projects',
+        search: 'Search',
+        searchIndex: 'Search index',
+        searchMin: 'Type at least two characters.',
+        searchNoMatches: 'No matches yet.',
+        searchUnavailable: 'Search index is unavailable.',
+        topicMap: 'Topic Map',
+        viewAll: 'View all',
+        viewArchive: 'View archive',
+        viewAtlas: 'Open atlas',
+        viewProjects: 'Open projects',
+      },
+      zh: {
+        about: '关于',
+        archive: '档案',
+        atlas: '图志',
+        essays: '长文',
+        featured: '精选',
+        index: '索引',
+        latest: '最新',
+        notes: '札记',
+        projects: '项目',
+        search: '搜索',
+        searchIndex: '搜索索引',
+        searchMin: '请输入至少两个字符。',
+        searchNoMatches: '暂时没有匹配。',
+        searchUnavailable: '搜索索引暂不可用。',
+        topicMap: '主题地图',
+        viewAll: '查看全部',
+        viewArchive: '查看档案',
+        viewAtlas: '打开图志',
+        viewProjects: '打开项目',
+      },
+    };
+
+    const placeholders = {
+      en: {
+        searchPlaceholder: 'Query notes and pages',
+      },
+      zh: {
+        searchPlaceholder: '搜索札记与页面',
+      },
+    };
+
+    const getLocale = () => (localStorage.getItem(storageKey) === 'zh' ? 'zh' : 'en');
+
+    const applyLocale = (locale) => {
+      localStorage.setItem(storageKey, locale);
+      document.documentElement.dataset.locale = locale;
+      document.documentElement.lang = locale === 'zh' ? 'zh-Hans' : 'en';
+
+      document.querySelectorAll('[data-i18n]').forEach((element) => {
+        const key = element.getAttribute('data-i18n');
+        const value = key ? dictionary[locale][key] : undefined;
+        if (value) {
+          element.textContent = value;
+        }
+      });
+
+      document.querySelectorAll('[data-i18n-placeholder]').forEach((element) => {
+        const key = element.getAttribute('data-i18n-placeholder');
+        const value = key ? placeholders[locale][key] : undefined;
+        if (value) {
+          element.setAttribute('placeholder', value);
+        }
+      });
+
+      document.querySelectorAll('[data-locale-toggle]').forEach((button) => {
+        const label = button.querySelector('[data-locale-toggle-label]');
+        button.setAttribute('aria-pressed', String(locale === 'zh'));
+        if (label) {
+          label.textContent = locale === 'zh' ? '中文' : 'EN';
+        }
+      });
+
+      document.dispatchEvent(new CustomEvent('psblog:localechange', { detail: { locale } }));
+    };
+
+    window.psblogLocale = {
+      get: getLocale,
+      set: applyLocale,
+      text: (key) => dictionary[getLocale()][key],
+    };
+
+    const init = () => {
+      document.querySelectorAll('[data-locale-toggle]').forEach((button) => {
+        button.addEventListener('click', () => {
+          applyLocale(getLocale() === 'zh' ? 'en' : 'zh');
+        });
+      });
+
+      applyLocale(getLocale());
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init, { once: true });
+    } else {
+      init();
+    }
+  })();
+</script>

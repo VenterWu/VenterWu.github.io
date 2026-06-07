@@ -1,40 +1,46 @@
 ---
+import LanguageToggle from './LanguageToggle.astro';
 import ThemeToggle from './ThemeToggle.astro';
-import { siteConfig, withBase } from '../utils/config';
+import { routes, siteConfig, withBase } from '../utils/config';
 
 const currentPath = Astro.url.pathname;
+const blogPath = withBase(routes.blog);
 ---
 
-<header class="sticky top-0 z-40 border-b border-line bg-canvas/90 backdrop-blur">
-  <div class="site-shell flex items-stretch justify-between gap-4 py-3">
-    <a class="focus-ring group flex items-stretch text-ink no-underline" href={withBase('/')} aria-label={`${siteConfig.title} home`}>
-      <span class="flex h-12 w-12 items-center justify-center bg-accent font-mono text-sm font-bold text-surface transition group-hover:bg-ink dark:group-hover:bg-highlight dark:group-hover:text-canvas">VF</span>
-      <span class="hidden border-y border-r border-line bg-surface px-4 py-2 sm:block">
-        <span class="block font-mono text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-accent">Archive</span>
-        <span class="block text-sm font-semibold text-ink">{siteConfig.title}</span>
+<header class="sticky top-0 z-40 border-b border-line/60 bg-canvas/90 backdrop-blur-md">
+  <div class="site-shell py-3">
+    <div class="flex items-center justify-between gap-4">
+      <a class="focus-ring group flex items-center gap-3 text-ink no-underline" href={withBase('/')} aria-label={`${siteConfig.title} home`}>
+        <span class="flex h-11 w-11 items-center justify-center rounded-md border border-line/70 bg-surface font-mono text-sm font-semibold text-accent transition group-hover:border-accent group-hover:bg-muted/70">VF</span>
+        <span class="hidden sm:block">
+          <span class="block font-mono text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-accent" data-i18n="archive">Archive</span>
+          <span class="block text-sm font-semibold text-ink">{siteConfig.title}</span>
+        </span>
+      </a>
+      <span class="flex items-center gap-2">
+        <LanguageToggle />
+        <ThemeToggle />
       </span>
-    </a>
-    <div class="flex items-center gap-3">
-      <nav class="hidden items-center gap-2 md:flex" aria-label="Primary navigation">
-        {
-          siteConfig.nav.map((item) => {
-            const href = withBase(item.href);
-            const isActive = currentPath === href || (item.href !== '/' && currentPath.startsWith(href));
-            return (
-              <a
-                class={`focus-ring border px-3 py-2 font-mono text-xs font-semibold uppercase tracking-[0.16em] no-underline ${
-                  isActive ? 'border-line bg-ink text-surface dark:bg-highlight dark:text-canvas' : 'border-line/50 bg-surface/70 text-soft hover:border-line hover:bg-surface hover:text-ink'
-                }`}
-                href={href}
-                aria-current={isActive ? 'page' : undefined}
-              >
-                {item.label}
-              </a>
-            );
-          })
-        }
-      </nav>
-      <ThemeToggle />
     </div>
+    <nav class="mt-3 flex gap-2 overflow-x-auto pb-1" aria-label="Primary navigation">
+      {
+        siteConfig.nav.map((item) => {
+          const href = withBase(item.href);
+          const isNotesBlogRoute = item.href === routes.notes && currentPath.startsWith(blogPath);
+          const isActive = currentPath.startsWith(href) || isNotesBlogRoute;
+          return (
+            <a
+              class={`focus-ring shrink-0 rounded-md border px-3 py-2 font-mono text-xs font-semibold uppercase tracking-[0.14em] no-underline transition ${
+                isActive ? 'border-accent bg-muted text-ink' : 'border-line/60 bg-surface/70 text-soft hover:border-accent hover:bg-muted/70 hover:text-ink'
+              }`}
+              href={href}
+              aria-current={isActive ? 'page' : undefined}
+            >
+              <span data-i18n={item.key}>{item.label}</span>
+            </a>
+          );
+        })
+      }
+    </nav>
   </div>
 </header>

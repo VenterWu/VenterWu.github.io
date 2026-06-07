@@ -8,13 +8,13 @@ import { routes } from '../../utils/config';
 const posts = await getPublishedBlogPosts();
 ---
 
-<BaseLayout title="Notes" description="All published notes from Venter Field Notes." canonicalPath={routes.blog}>
+<BaseLayout title="Notes" description="Recent notes and build logs from Venter Field Notes." canonicalPath={routes.notes}>
   <section class="site-shell py-12">
     <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
       <div>
         <p class="label-code" data-i18n="notes">Notes</p>
         <h1 class="mt-2 font-serif text-5xl font-medium text-ink">Notes</h1>
-        <p class="mt-4 max-w-2xl text-soft">Published notes, experiments, and implementation writeups.</p>
+        <p class="mt-4 max-w-2xl text-soft">Notebook-style entries, implementation notes, learning logs, and other published fragments.</p>
       </div>
       <SearchBox />
     </div>

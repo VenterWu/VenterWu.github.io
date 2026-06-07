@@ -4,16 +4,16 @@ import { siteConfig, withBase } from '../utils/config';
 const year = new Date().getFullYear();
 ---
 
-<footer class="border-t border-line bg-ink text-surface dark:bg-surface dark:text-ink">
+<footer class="border-t border-line/70 bg-surface/70 text-ink backdrop-blur-sm">
   <div class="site-shell grid gap-6 py-8 text-sm sm:grid-cols-[1fr_auto] sm:items-end">
     <div>
-      <p class="font-mono text-xs font-semibold uppercase tracking-[0.22em] text-accent">Static log / {year}</p>
-      <p class="mt-2 max-w-xl text-surface/75 dark:text-soft">Built with Astro for fast, durable notes by {siteConfig.author.name}.</p>
+      <p class="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-accent">Archive log / {year}</p>
+      <p class="mt-2 max-w-xl text-soft">Built with Astro for fast, durable notes by {siteConfig.author.name}.</p>
     </div>
     <nav class="flex flex-wrap gap-3" aria-label="Footer navigation">
       {
         siteConfig.social.map((item) => (
-          <a class="focus-ring border border-surface/40 px-3 py-2 font-mono text-xs font-semibold uppercase tracking-[0.16em] text-surface no-underline hover:border-accent hover:text-accent dark:border-line dark:text-ink" href={item.href.startsWith('/') ? withBase(item.href) : item.href}>
+          <a class="archive-link" href={item.href.startsWith('/') ? withBase(item.href) : item.href}>
             {item.label}
           </a>
         ))

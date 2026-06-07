@@ -7,24 +7,25 @@ import TagList from './TagList.astro';
 
 interface Props {
   post: PublishedBlogPost;
+  compact?: boolean;
 }
 
-const { post } = Astro.props;
+const { post, compact = false } = Astro.props;
 const href = withBase(routes.blogPost(post.slug));
 ---
 
-<article class="construct-panel group relative overflow-hidden p-5 transition hover:-translate-x-0.5 hover:-translate-y-0.5">
-  <span class="absolute right-0 top-0 h-3 w-16 bg-accent" aria-hidden="true"></span>
-  <div class="flex flex-wrap items-center gap-2 font-mono text-xs font-semibold uppercase tracking-[0.16em] text-soft">
+<article class="archive-panel group relative overflow-hidden p-5 transition duration-200 hover:-translate-y-0.5 hover:border-accent">
+  <span class="absolute right-4 top-0 h-px w-14 bg-accent/70" aria-hidden="true"></span>
+  <div class="flex flex-wrap items-center gap-2 font-mono text-xs font-semibold uppercase tracking-[0.14em] text-soft">
     <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
     <span class="text-accent" aria-hidden="true">/</span>
     <span>{getReadingTime(post.body)}</span>
   </div>
-  <h2 class="mt-4 text-2xl font-semibold leading-tight text-ink">
+  <h2 class={`${compact ? 'text-xl' : 'text-2xl'} mt-4 font-serif font-medium leading-tight text-ink`}>
     <a class="focus-ring rounded-sm text-ink no-underline hover:text-accent" href={href}>{post.data.title}</a>
   </h2>
   <p class="mt-3 text-sm leading-6 text-soft">{post.data.description}</p>
-  <div class="mt-4">
+  <div class={`${compact ? 'hidden xl:block' : ''} mt-4`}>
     <TagList tags={post.data.tags} />
   </div>
 </article>

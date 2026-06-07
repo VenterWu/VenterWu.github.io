@@ -1,0 +1,41 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TagList from '../../components/TagList.astro';
+import { getPublishedBlogPosts, getTagStats } from '../../utils/content';
+import { formatDate } from '../../utils/date';
+import { routes, withBase } from '../../utils/config';
+
+const posts = await getPublishedBlogPosts();
+const tags = getTagStats(posts);
+---
+
+<BaseLayout title="Archive" description="Dated archive of all published notes." canonicalPath={routes.archive}>
+  <section class="site-shell py-12">
+    <p class="label-code" data-i18n="archive">Archive</p>
+    <h1 class="mt-2 font-serif text-5xl font-medium text-ink">Archive</h1>
+    <p class="mt-4 max-w-2xl text-soft">A dated shelf of published notes, with a small topic map for cross-reading.</p>
+
+    <div class="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
+      <div class="archive-panel divide-y divide-line/60">
+        {
+          posts.map((post, index) => (
+            <a class="focus-ring grid gap-2 p-4 no-underline transition hover:bg-muted/45 sm:grid-cols-[5rem_1fr]" href={withBase(routes.blogPost(post.slug))}>
+              <span class="font-mono text-xs uppercase tracking-[0.14em] text-soft">N-{String(index + 1).padStart(3, '0')}</span>
+              <span>
+                <span class="block font-serif text-2xl font-medium text-ink">{post.data.title}</span>
+                <span class="mt-1 block font-mono text-xs uppercase tracking-[0.14em] text-soft">{formatDate(post.data.pubDate)}</span>
+              </span>
+            </a>
+          ))
+        }
+      </div>
+
+      <aside class="archive-panel p-4 lg:sticky lg:top-32 lg:self-start">
+        <p class="label-code" data-i18n="topicMap">Topic Map</p>
+        <div class="mt-4">
+          <TagList tags={tags.map((tag) => tag.label)} />
+        </div>
+      </aside>
+    </div>
+  </section>
+</BaseLayout>

@@ -13,10 +13,12 @@ export const siteConfig = {
     email: 'hello@example.com',
   },
   nav: [
-    { label: 'Home', href: '/' },
-    { label: 'Blog', href: '/blog/' },
-    { label: 'Tags', href: '/tags/' },
-    { label: 'About', href: '/pages/about/' },
+    { label: 'Notes', zhLabel: '札记', key: 'notes', href: '/notes/' },
+    { label: 'Essays', zhLabel: '长文', key: 'essays', href: '/essays/' },
+    { label: 'Projects', zhLabel: '项目', key: 'projects', href: '/projects/' },
+    { label: 'Atlas', zhLabel: '图志', key: 'atlas', href: '/atlas/' },
+    { label: 'Archive', zhLabel: '档案', key: 'archive', href: '/archive/' },
+    { label: 'About', zhLabel: '关于', key: 'about', href: '/pages/about/' },
   ],
   social: [
     { label: 'GitHub', href: 'https://github.com/VenterWu' },
@@ -31,6 +33,11 @@ export const siteConfig = {
 export const routes = {
   home: '/',
   blog: '/blog/',
+  notes: '/notes/',
+  essays: '/essays/',
+  projects: '/projects/',
+  atlas: '/atlas/',
+  archive: '/archive/',
   tags: '/tags/',
   rss: '/rss.xml',
   search: '/search.json',

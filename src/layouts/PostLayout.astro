@@ -31,7 +31,7 @@ const updatedDate = post.data.updatedDate ?? post.data.pubDate;
 >
   <article class="site-shell grid gap-8 py-12 lg:grid-cols-[minmax(0,1fr)_16rem]">
     <div class="min-w-0">
-      <header class="border-b border-line pb-8">
+      <header class="border-b border-line/70 pb-8">
         <div class="flex flex-wrap items-center gap-2 font-mono text-xs font-semibold uppercase tracking-[0.16em] text-soft">
           <time datetime={toIsoDate(post.data.pubDate)}>{formatDate(post.data.pubDate)}</time>
           <span class="text-accent" aria-hidden="true">/</span>
@@ -39,7 +39,7 @@ const updatedDate = post.data.updatedDate ?? post.data.pubDate;
           <span class="text-accent" aria-hidden="true">/</span>
           <span>{getReadingTime(post.body)}</span>
         </div>
-        <h1 class="mt-4 text-5xl font-semibold leading-tight text-ink sm:text-6xl">{post.data.title}</h1>
+        <h1 class="mt-4 font-serif text-5xl font-medium leading-tight text-ink sm:text-6xl">{post.data.title}</h1>
         <p class="mt-4 max-w-2xl text-lg leading-8 text-soft">{post.data.description}</p>
         <div class="mt-5">
           <TagList tags={post.data.tags} />
@@ -50,10 +50,10 @@ const updatedDate = post.data.updatedDate ?? post.data.pubDate;
         <slot />
       </div>
 
-      <nav class="mt-12 grid gap-4 border-t border-line pt-8 sm:grid-cols-2" aria-label="Post navigation">
+      <nav class="mt-12 grid gap-4 border-t border-line/70 pt-8 sm:grid-cols-2" aria-label="Post navigation">
         {
           previousPost ? (
-            <a class="focus-ring construct-panel p-4 no-underline hover:bg-muted" href={withBase(routes.blogPost(previousPost.slug))}>
+            <a class="focus-ring archive-panel p-4 no-underline hover:border-accent hover:bg-muted/50" href={withBase(routes.blogPost(previousPost.slug))}>
               <span class="font-mono text-xs uppercase tracking-[0.16em] text-soft">Previous</span>
               <span class="mt-2 block font-semibold text-ink">{previousPost.data.title}</span>
             </a>
@@ -63,7 +63,7 @@ const updatedDate = post.data.updatedDate ?? post.data.pubDate;
         }
         {
           nextPost && (
-            <a class="focus-ring construct-panel p-4 text-right no-underline hover:bg-muted" href={withBase(routes.blogPost(nextPost.slug))}>
+            <a class="focus-ring archive-panel p-4 text-right no-underline hover:border-accent hover:bg-muted/50" href={withBase(routes.blogPost(nextPost.slug))}>
               <span class="font-mono text-xs uppercase tracking-[0.16em] text-soft">Next</span>
               <span class="mt-2 block font-semibold text-ink">{nextPost.data.title}</span>
             </a>
@@ -73,7 +73,7 @@ const updatedDate = post.data.updatedDate ?? post.data.pubDate;
     </div>
 
     <aside class="lg:sticky lg:top-24 lg:self-start">
-      <div class="construct-panel p-4">
+      <div class="archive-panel p-4">
         <h2 class="label-code">On this page</h2>
         {
           tocHeadings.length > 0 ? (

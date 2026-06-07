@@ -9,12 +9,12 @@ const tags = getTagStats(posts);
 
 <BaseLayout title="Tags" description="Browse blog posts by tag." canonicalPath={routes.tags}>
   <section class="site-shell py-12">
-    <p class="label-code">Topics</p>
-    <h1 class="mt-2 text-5xl font-semibold text-ink">Tags</h1>
+    <p class="label-code" data-i18n="topicMap">Topic Map</p>
+    <h1 class="mt-2 font-serif text-5xl font-medium text-ink">Tags</h1>
     <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {
         tags.map((tag) => (
-          <a class="focus-ring construct-panel p-5 no-underline transition hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-muted" href={withBase(routes.tag(tag.slug))}>
+          <a class="focus-ring archive-panel p-5 no-underline transition hover:-translate-y-0.5 hover:border-accent hover:bg-muted/50" href={withBase(routes.tag(tag.slug))}>
             <span class="block text-lg font-semibold text-ink">{tag.label}</span>
             <span class="mt-2 block font-mono text-xs uppercase tracking-[0.16em] text-soft">{tag.count} post{tag.count === 1 ? '' : 's'}</span>
           </a>
