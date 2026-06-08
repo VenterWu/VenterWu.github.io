@@ -11,6 +11,7 @@ import re
 import shutil
 import subprocess
 from typing import Callable, Iterable
+from urllib.parse import unquote, urlsplit
 
 MARKDOWN_EXTENSIONS = {".md", ".mdx"}
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"}
@@ -22,6 +23,13 @@ SITE_URL_FALLBACK = "https://venterwu.github.io/"
 REPO_URL_FALLBACK = "https://github.com/VenterWu/VenterWu.github.io"
 DEFAULT_AUTHOR = "Kefan Wu"
 DEFAULT_TAG = "notes"
+PUBLIC_REFERENCE_PREFIXES = ("/uploads/", "/images/", "/files/")
+PUBLIC_ROOT_REFERENCES = {"/favicon.svg", "/robots.txt"}
+MARKDOWN_URL_RE = re.compile(r"!?\[[^\]]*\]\(([^)]+)\)")
+HTML_MEDIA_URL_RE = re.compile(
+    r"<(?:img|video|audio|source)\b[^>]*\bsrc\s*=\s*(['\"])(.*?)\1",
+    re.IGNORECASE,
+)
 
 LogCallback = Callable[[str], None]
 
@@ -48,6 +56,29 @@ class ImportResult:
     public_url: str
     kind: str
     message: str
+
+
+@dataclass(slots=True)
+class LibraryItem:
+    type: str
+    kind: str
+    title: str
+    slug: str
+    relative_path: str
+    public_url: str
+    description: str = ""
+    author: str = ""
+    date: str = ""
+    updated_date: str = ""
+    tags: list[str] = field(default_factory=list)
+    draft: bool = False
+    featured: bool = False
+    order: int | None = None
+    hero_image: str = ""
+    file_size: int = 0
+    modified_time: str = ""
+    references: list[str] = field(default_factory=list)
+    referenced_by: list[str] = field(default_factory=list)
 
 
 def find_repo_root(start: str | Path | None = None) -> Path | None:
@@ -173,6 +204,318 @@ def read_markdown_metadata(path: Path) -> dict[str, object]:
     text = path.read_text(encoding="utf-8-sig", errors="replace")
     frontmatter, _body = split_frontmatter(text)
     return parse_frontmatter(frontmatter) if frontmatter else {}
+
+
+def scan_content_library(repo_root: Path) -> list[LibraryItem]:
+    repo_root = require_repo_root(repo_root)
+    asset_items = _scan_public_assets(repo_root)
+    known_public_urls = {item.public_url for item in asset_items if item.public_url}
+
+    markdown_items: list[LibraryItem] = []
+    for collection in ("blog", "pages"):
+        collection_root = repo_root / "src" / "content" / collection
+        if not collection_root.is_dir():
+            continue
+        for path in sorted(collection_root.rglob("*.md")):
+            if path.is_file():
+                markdown_items.append(_read_markdown_library_item(repo_root, path, collection, known_public_urls))
+
+    _attach_reverse_references(markdown_items, asset_items)
+    return sorted([*markdown_items, *asset_items], key=_library_sort_key)
+
+
+def save_markdown_metadata(repo_root: Path, relative_path: str | Path, metadata: PublishMetadata) -> Path:
+    repo_root = require_repo_root(repo_root)
+    raw_path = Path(relative_path)
+    path = raw_path if raw_path.is_absolute() else repo_root / raw_path
+    path = path.resolve(strict=False)
+    collection = _markdown_collection_for_path(repo_root, path)
+    if not path.is_file():
+        raise ValueError(f"Markdown file does not exist: {path}")
+    if path.suffix.lower() not in MARKDOWN_EXTENSIONS:
+        raise ValueError(f"Selected item is not a Markdown file: {path}")
+
+    validate_metadata(collection, metadata)
+
+    text = path.read_text(encoding="utf-8-sig", errors="replace")
+    frontmatter, body = split_frontmatter(text)
+    existing = parse_frontmatter(frontmatter) if frontmatter else {}
+    updated = dict(existing)
+
+    updated["title"] = metadata.title.strip()
+    updated["description"] = metadata.description.strip()
+
+    if collection == "blog":
+        updated["pubDate"] = format_datetime(metadata.date, metadata.time)
+        updated["author"] = metadata.author.strip()
+        updated["tags"] = parse_tags(metadata.tags)
+        if metadata.hero_image.strip():
+            updated["heroImage"] = metadata.hero_image.strip()
+        else:
+            updated.pop("heroImage", None)
+        updated["draft"] = bool(metadata.draft)
+        updated["featured"] = bool(metadata.featured)
+        preferred_keys = [
+            "title",
+            "description",
+            "pubDate",
+            "updatedDate",
+            "author",
+            "tags",
+            "heroImage",
+            "draft",
+            "featured",
+        ]
+    else:
+        if metadata.date.strip():
+            updated["updatedDate"] = format_datetime(metadata.date, metadata.time)
+        else:
+            updated.pop("updatedDate", None)
+        updated["order"] = int(metadata.order)
+        updated["draft"] = bool(metadata.draft)
+        preferred_keys = ["title", "description", "updatedDate", "order", "draft"]
+
+    frontmatter_output = serialize_frontmatter(updated, preferred_keys)
+    path.write_text(f"{frontmatter_output}\n\n{body.rstrip()}\n", encoding="utf-8", newline="\n")
+    return path
+
+
+def serialize_frontmatter(data: dict[str, object], preferred_keys: Iterable[str]) -> str:
+    lines = ["---"]
+    written: set[str] = set()
+
+    for key in preferred_keys:
+        if key in data and _should_write_frontmatter_value(key, data[key]):
+            lines.extend(_frontmatter_value_lines(key, data[key]))
+            written.add(key)
+
+    for key in sorted(data):
+        if key not in written and _should_write_frontmatter_value(key, data[key]):
+            lines.extend(_frontmatter_value_lines(key, data[key]))
+
+    lines.append("---")
+    return "\n".join(lines)
+
+
+def extract_public_references(
+    markdown_body: str,
+    hero_image: str = "",
+    known_public_urls: Iterable[str] | None = None,
+) -> list[str]:
+    known_urls = set(known_public_urls or ())
+    raw_urls: list[str] = []
+    if hero_image.strip():
+        raw_urls.append(hero_image)
+    raw_urls.extend(match.group(1) for match in MARKDOWN_URL_RE.finditer(markdown_body))
+    raw_urls.extend(match.group(2) for match in HTML_MEDIA_URL_RE.finditer(markdown_body))
+
+    references: set[str] = set()
+    for raw_url in raw_urls:
+        public_url = normalize_public_reference(raw_url)
+        if public_url and _looks_like_public_asset_url(public_url, known_urls):
+            references.add(public_url)
+    return sorted(references)
+
+
+def normalize_public_reference(raw_url: str) -> str | None:
+    cleaned = raw_url.strip().strip('"\'')
+    if not cleaned:
+        return None
+    if cleaned.startswith("<") and cleaned.endswith(">"):
+        cleaned = cleaned[1:-1].strip()
+    cleaned = cleaned.split()[0].strip().strip('"\'')
+
+    lowered = cleaned.lower()
+    if lowered.startswith(("#", "mailto:", "tel:", "data:")):
+        return None
+
+    parsed = urlsplit(cleaned)
+    if parsed.scheme or parsed.netloc:
+        return None
+
+    path = unquote(parsed.path).replace("\\", "/")
+    if not path:
+        return None
+    if not path.startswith("/"):
+        if path.startswith(("uploads/", "images/", "files/")) or path in {"favicon.svg", "robots.txt"}:
+            path = f"/{path}"
+        else:
+            return None
+    return re.sub(r"/+", "/", path)
+
+
+def _scan_public_assets(repo_root: Path) -> list[LibraryItem]:
+    public_root = repo_root / "public"
+    if not public_root.is_dir():
+        return []
+
+    items: list[LibraryItem] = []
+    for path in sorted(public_root.rglob("*")):
+        if path.is_file():
+            items.append(_read_asset_library_item(repo_root, path))
+    return items
+
+
+def _read_markdown_library_item(
+    repo_root: Path,
+    path: Path,
+    collection: str,
+    known_public_urls: Iterable[str],
+) -> LibraryItem:
+    collection_root = repo_root / "src" / "content" / collection
+    text = path.read_text(encoding="utf-8-sig", errors="replace")
+    frontmatter, body = split_frontmatter(text)
+    data = parse_frontmatter(frontmatter) if frontmatter else {}
+    relative_slug = path.relative_to(collection_root).with_suffix("").as_posix()
+    content_type = "blog" if collection == "blog" else "page"
+    date_value = str(data.get("pubDate") or "")
+    updated_date_value = str(data.get("updatedDate") or "")
+    hero_image = str(data.get("heroImage") or "")
+
+    return LibraryItem(
+        type=content_type,
+        kind="post" if collection == "blog" else "page",
+        title=str(data.get("title") or guess_title_from_path(path)),
+        slug=relative_slug,
+        relative_path=path.relative_to(repo_root).as_posix(),
+        public_url=f"/{'blog' if collection == 'blog' else 'pages'}/{relative_slug}/",
+        description=str(data.get("description") or ""),
+        author=str(data.get("author") or ""),
+        date=date_value,
+        updated_date=updated_date_value,
+        tags=_metadata_list(data.get("tags")),
+        draft=_metadata_bool(data.get("draft")),
+        featured=_metadata_bool(data.get("featured")),
+        order=_metadata_int(data.get("order"), None),
+        hero_image=hero_image,
+        file_size=_file_size(path),
+        modified_time=_modified_time(path),
+        references=extract_public_references(body, hero_image, known_public_urls),
+    )
+
+
+def _read_asset_library_item(repo_root: Path, path: Path) -> LibraryItem:
+    public_root = repo_root / "public"
+    public_url = "/" + path.relative_to(public_root).as_posix()
+    return LibraryItem(
+        type="asset",
+        kind=asset_category(path.suffix.lower()),
+        title=path.name,
+        slug=path.stem,
+        relative_path=path.relative_to(repo_root).as_posix(),
+        public_url=public_url,
+        file_size=_file_size(path),
+        modified_time=_modified_time(path),
+    )
+
+
+def _attach_reverse_references(markdown_items: list[LibraryItem], asset_items: list[LibraryItem]) -> None:
+    assets_by_url = {item.public_url: item for item in asset_items if item.public_url}
+    for markdown_item in markdown_items:
+        markdown_item.references = sorted(set(markdown_item.references))
+        for public_url in markdown_item.references:
+            asset_item = assets_by_url.get(public_url)
+            if asset_item:
+                asset_item.referenced_by.append(markdown_item.relative_path)
+
+    for asset_item in asset_items:
+        asset_item.referenced_by = sorted(set(asset_item.referenced_by))
+
+
+def _library_sort_key(item: LibraryItem) -> tuple[int, str]:
+    type_order = {"blog": 0, "page": 1, "asset": 2}
+    return type_order.get(item.type, 99), item.relative_path.lower()
+
+
+def _markdown_collection_for_path(repo_root: Path, path: Path) -> str:
+    try:
+        relative_parts = path.relative_to(repo_root).parts
+    except ValueError as exc:
+        raise ValueError(f"Path is outside the repository: {path}") from exc
+
+    if len(relative_parts) >= 4 and relative_parts[:3] == ("src", "content", "blog"):
+        return "blog"
+    if len(relative_parts) >= 4 and relative_parts[:3] == ("src", "content", "pages"):
+        return "pages"
+    raise ValueError(f"Selected Markdown is not in src/content/blog or src/content/pages: {path}")
+
+
+def _should_write_frontmatter_value(key: str, value: object) -> bool:
+    if value is None:
+        return False
+    if key in {"heroImage", "updatedDate"} and not str(value).strip():
+        return False
+    return True
+
+
+def _frontmatter_value_lines(key: str, value: object) -> list[str]:
+    if isinstance(value, bool):
+        return [f"{key}: {yaml_bool(value)}"]
+    if isinstance(value, int):
+        return [f"{key}: {value}"]
+    if isinstance(value, float):
+        return [f"{key}: {value}"]
+    if isinstance(value, list):
+        if not value:
+            return [f"{key}: []"]
+        lines = [f"{key}:"]
+        for item in value:
+            lines.append(f"  - {_yaml_scalar(item)}")
+        return lines
+    return [f"{key}: {yaml_string(str(value))}"]
+
+
+def _yaml_scalar(value: object) -> str:
+    if isinstance(value, bool):
+        return yaml_bool(value)
+    if isinstance(value, int | float):
+        return str(value)
+    return yaml_string(str(value))
+
+
+def _looks_like_public_asset_url(public_url: str, known_public_urls: set[str]) -> bool:
+    return (
+        public_url in known_public_urls
+        or public_url.startswith(PUBLIC_REFERENCE_PREFIXES)
+        or public_url in PUBLIC_ROOT_REFERENCES
+    )
+
+
+def _metadata_list(value: object) -> list[str]:
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    if isinstance(value, str):
+        return [piece.strip() for piece in value.split(",") if piece.strip()]
+    return []
+
+
+def _metadata_bool(value: object) -> bool:
+    if isinstance(value, bool):
+        return value
+    return str(value or "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _metadata_int(value: object, default: int | None) -> int | None:
+    if value is None or value == "":
+        return default
+    try:
+        return int(str(value))
+    except ValueError:
+        return default
+
+
+def _file_size(path: Path) -> int:
+    try:
+        return path.stat().st_size
+    except OSError:
+        return 0
+
+
+def _modified_time(path: Path) -> str:
+    try:
+        return datetime.fromtimestamp(path.stat().st_mtime).replace(microsecond=0).isoformat(sep=" ")
+    except OSError:
+        return ""
 
 
 def _parse_scalar(value: str) -> object:

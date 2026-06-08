@@ -12,6 +12,8 @@ The requested conda environment is `psblog` with Python 3.11. It is reserved for
 conda run -n psblog python --version
 ```
 
+For the local visual publisher, use the repository-root launchers `Start-BlogPublisher.cmd` or `Start-BlogPublisher.ps1`; it can import new content, browse the existing content library, inspect public asset references, and edit Markdown metadata. See [docs/publisher-guide.md](docs/publisher-guide.md).
+
 `pnpm` was not available on this machine during initialization, so use `npm` unless you install `pnpm` later.
 
 The project pins Astro 4.16.19 because this machine currently uses Node.js 18.19.0. Upgrade Node to 18.20.8 or newer before moving to Astro 5.
