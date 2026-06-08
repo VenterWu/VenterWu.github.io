@@ -74,6 +74,8 @@ For a project repository, set `base` to `/<repo-name>` in `src/utils/config.ts`;
 
 ## Add A Blog Post
 
+For a visual workflow, run the local publisher with `conda run -n psblog python -m tools.blog_publisher`; see `docs/publisher-guide.md` for importing Markdown and public assets.
+
 1. Create `src/content/blog/my-post.md`.
 2. Add frontmatter that satisfies `docs/content-schema.md`.
 3. Write Markdown content with headings for the TOC.

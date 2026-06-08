@@ -79,5 +79,6 @@ When moving posts from another blog:
 
 - [docs/architecture.md](docs/architecture.md): project structure, route map, build and deployment design.
 - [docs/content-schema.md](docs/content-schema.md): collection schemas, examples, and migration rules.
+- [docs/publisher-guide.md](docs/publisher-guide.md): Chinese guide for the local visual content publisher.
 - [docs/dev-guide.md](docs/dev-guide.md): environment, install, run, build, deploy, and troubleshooting steps.
 - [docs/agile.md](docs/agile.md): MVP definition, backlog, done criteria, and release risks.
